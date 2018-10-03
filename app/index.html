@@ -1,0 +1,33 @@
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <link rel="stylesheet" type="text/css" href="app.css">
+    <meta charset="UTF-8">
+    <title>IPFS chat</title>
+</head>
+<body>
+<div id="chat-wrapper">
+    <div class="statusline">
+        It's
+        <div class="statusline" id="nodestatus">dead</div>
+        <div class="hidden"> and connected to
+            <div class="statusline" id="peercount">0</div>
+            peers
+        </div>
+    </div>
+    <br>
+
+    <div id="messagebox" class="box">
+
+    </div>
+    
+    <div id="bottombox" class="box">
+        <input type="text" id="chat-name" value="steefmin"/>
+        <input type="text" id="chat-message"/>
+        <button id="chat-send">Send</button>
+    </div>
+</div>
+<script src="ipfs.js" type="text/javascript"></script>
+<script src="app.js" type="text/javascript"></script>
+
+</body>
+</html>
