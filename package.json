@@ -1,0 +1,22 @@
+{
+  "name": "ipfs-image-board",
+  "version": "0.1.0",
+  "description": "image board powered by ipfs",
+  "main": "app/index.html",
+  "dependencies": {
+    "standard": "^12.0.1"
+  },
+  "devDependencies": {
+    "standard": "^12.0.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "add": "cd app && ipfs add -rQ"
+  },
+  "keywords": [
+    "ipfs",
+    "imageboard"
+  ],
+  "author": "Steef Min",
+  "license": "ISC"
+}
