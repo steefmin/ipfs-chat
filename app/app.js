@@ -20,7 +20,7 @@ const $chatsend = document.querySelector('#chat-send')
 const $chatmessage = document.querySelector('#chat-message')
 const $chatname = document.querySelector('#chat-name')
 
-let appLink = ''
+let appLink = 'https://chat.steefmin.xyz'
 const pubsubpairs = {
   'chat': chathandler
 }
@@ -30,7 +30,7 @@ let myfile
 function onReady () {
   if (window.location.pathname.startsWith('/ipfs/Qm')) {
     appLink = window.location.pathname
-  }
+  } 
   $nodestatus.innerText = 'loading'
   node.id(function (err, data) {
     if (err) throw err
@@ -118,7 +118,7 @@ function messageContentFromSubMsg (msgObj) {
     maindiv.appendChild(textdiv)
     return maindiv
   }
-  return msgObj
+  return document.createElement('div').innerText(msgObj.toString())
 }
 
 function timeformat (ts) {
