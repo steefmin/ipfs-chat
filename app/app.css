@@ -8,7 +8,7 @@
 }
 
 #chat-wrapper {
-    width: 500px;
+    width: device-width;
     margin: 10px;
     font-family: sans-serif;
 }
