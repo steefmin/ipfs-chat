@@ -12,45 +12,45 @@ const options = {
   }
 }
 
-const $nodestatus = document.querySelector('#nodestatus')
-const $peercount = document.querySelector('#peercount')
+const NODE_STATUS = document.querySelector('#nodestatus')
+const PEER_COUNT = document.querySelector('#peercount')
 
-const $messagebox = document.querySelector('#messagebox')
-const $chatsend = document.querySelector('#chat-send')
-const $chatmessage = document.querySelector('#chat-message')
-const $chatname = document.querySelector('#chat-name')
+const MESSAGE_BOX = document.querySelector('#messagebox')
+const USER_LIST = document.querySelector('#userlist')
+const CHAT_SEND = document.querySelector('#chat-send')
+const CHAT_MESSAGE = document.querySelector('#chat-message')
+const CHAT_NAME = document.querySelector('#chat-name')
+
+let userlist = [];
+
+const date = new Date()
+CHAT_NAME.value = 'anonymous-' + date.getUTCMilliseconds()
 
 let appLink = 'https://chat.steefmin.xyz'
 const pubsubpairs = {
   'chat': chathandler
 }
 let NODE_ID
-let myfile
 
 function onReady () {
   if (window.location.pathname.startsWith('/ipfs/Qm')) {
     appLink = window.location.pathname
-  } 
-  $nodestatus.innerText = 'loading'
+  }
+
+  NODE_STATUS.innerText = 'loading'
+
   node.id(function (err, data) {
     if (err) throw err
-    $nodestatus.innerText = 'alive'
+    NODE_STATUS.innerText = 'alive'
     let div = document.createElement('div')
     NODE_ID = data.id
     div.innerText = ' powered by ' + data.agentVersion.split('/')[0]
     div.style.display = 'inline'
-    $nodestatus.appendChild(div)
+    NODE_STATUS.appendChild(div)
     updatePeers()
     subscribePubsub(pubsubpairs)
     enableButtons()
     console.log(NODE_ID)
-
-    node.files.get('QmZQaqrtPCdYohZ2XBdnia2PdRX3oKGuhtHj6WjUBvnoVy', function (err, files) {
-      if (err) throw err
-      files.forEach(function (file) {
-        myfile = file.content.toString('utf8')
-      })
-    })
   })
 }
 
@@ -61,20 +61,21 @@ function subscribePubsub (pairs) {
 }
 
 function enableButtons () {
-  $chatsend.addEventListener('click', function () {
-    if ($chatmessage.value !== '') {
-      node.pubsub.publish('chat', node.types.Buffer.from(JSON.stringify({
-        text: $chatmessage.value,
-        name: $chatname.value,
+  CHAT_SEND.addEventListener('click', function () {
+    if (CHAT_MESSAGE.value !== '') {
+      node.pubsub.publish('chat', window.Ipfs.Buffer.from(JSON.stringify({
+        text: CHAT_MESSAGE.value,
+        name: CHAT_NAME.value,
         applink: appLink,
+        id: NODE_ID,
         ts: Date.now()
       })))
-      $chatmessage.value = ''
+      CHAT_MESSAGE.value = ''
     }
   })
-  $chatmessage.addEventListener('keyup', function (event) {
+  CHAT_MESSAGE.addEventListener('keyup', function (event) {
     if (event.keyCode === 13) {
-      $chatsend.click()
+      CHAT_SEND.click()
     }
   })
 }
@@ -84,7 +85,6 @@ function chathandler (msg) {
   let message = document.createElement('div')
   let messagebar = document.createElement('div')
   let msgJson = JSON.parse(msg.data.toString())
-  // message.innerHTML = messageContentFromSubMsg(msgJson)
   message.appendChild(messageContentFromSubMsg(msgJson))
   message.classList.add('message')
   messagebar.classList.add('messagebar')
@@ -92,18 +92,26 @@ function chathandler (msg) {
     message.classList.add('fromMe')
   }
   messagebar.appendChild(message)
-  $messagebox.appendChild(messagebar)
-  let addedScroll = $messagebox.scrollHeight - previousScrollHeight
-  let currentScroll = $messagebox.scrollHeight - $messagebox.scrollTop
-  let userHasScrolled = currentScroll - addedScroll > $messagebox.clientHeight
+  MESSAGE_BOX
+    .appendChild(messagebar)
+  let addedScroll = MESSAGE_BOX
+    .scrollHeight - previousScrollHeight
+  let currentScroll = MESSAGE_BOX
+    .scrollHeight - MESSAGE_BOX
+    .scrollTop
+  let userHasScrolled = currentScroll - addedScroll > MESSAGE_BOX
+    .clientHeight
   if (!userHasScrolled) {
-    $messagebox.scrollTop = $messagebox.scrollHeight
+    MESSAGE_BOX
+      .scrollTop = MESSAGE_BOX
+        .scrollHeight
   }
-  previousScrollHeight = $messagebox.scrollHeight
+  previousScrollHeight = MESSAGE_BOX
+    .scrollHeight
+  upsertUserlist(msgJson)
 }
 
 function messageContentFromSubMsg (msgObj) {
-  console.log(msgObj)
   if (msgObj.name && msgObj.text && msgObj.ts) {
     let maindiv = document.createElement('div')
     let namediv = document.createElement('div')
@@ -133,9 +141,38 @@ function updatePeers () {
   document.querySelector('.hidden').style.display = 'inline'
   node.swarm.peers(function (err, peers) {
     if (err) throw err
-    $peercount.innerText = peers.length
+    PEER_COUNT.innerText = peers.length
   })
+  updateUserList()
   setTimeout(updatePeers, 5000)
+}
+
+
+function upsertUserlist (msgJson) {
+  userlist = userlist.filter(function (user) {
+    return user.id !== msgJson.id
+  })
+  userlist.unshift(
+    {
+      id: msgJson.id,
+      name: msgJson.name
+    }
+  )
+  updateUserList()
+}
+
+function updateUserList () {
+  USER_LIST.innerHTML = ''
+  userlist.map(function (user) {
+    USER_LIST.append(createName(user.name))
+  })
+}
+
+function createName (name) {
+  let el = document.createElement('div')
+  el.classList.add('name')
+  el.innerHTML = name
+  return el
 }
 
 /* global Ipfs */
